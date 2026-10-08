@@ -1,0 +1,103 @@
+-- 深空云顶官网独立数据库 gamessxu_shenkong 表结构
+-- 说明：spring.sql.init.mode=always 每次启动执行，故采用 CREATE TABLE IF NOT EXISTS 幂等写法，勿使用 DROP TABLE
+-- 初始化数据在 data.sql 中（INSERT IGNORE 幂等，可重复执行）
+
+SET NAMES utf8mb4;
+
+CREATE TABLE IF NOT EXISTS game (
+  id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',
+  game_id VARCHAR(64) NOT NULL COMMENT '游戏唯一标识',
+  name VARCHAR(128) NOT NULL COMMENT '游戏名称',
+  subtitle VARCHAR(128) COMMENT '副标题',
+  category VARCHAR(32) NOT NULL COMMENT '分类',
+  tagline VARCHAR(256) COMMENT '标语',
+  summary VARCHAR(500) COMMENT '简短介绍',
+  description TEXT COMMENT '详细介绍',
+  url VARCHAR(500) COMMENT '官网地址',
+  cover VARCHAR(500) NOT NULL COMMENT '封面渐变或图片',
+  style VARCHAR(32) COMMENT '视觉风格: fairytale 童话魔幻',
+  featured TINYINT NOT NULL DEFAULT 0 COMMENT '是否精选 1是 0否',
+  sort INT NOT NULL DEFAULT 100 COMMENT '排序值',
+  status TINYINT NOT NULL DEFAULT 1 COMMENT '1上线 0下线',
+  create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_game_id (game_id),
+  KEY idx_status_sort (status, sort)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='游戏作品';
+
+CREATE TABLE IF NOT EXISTS news (
+  id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',
+  title VARCHAR(200) NOT NULL COMMENT '标题',
+  summary VARCHAR(500) COMMENT '摘要',
+  content TEXT COMMENT '正文',
+  category VARCHAR(32) NOT NULL DEFAULT 'news' COMMENT '分类: news/notice/activity',
+  cover_image VARCHAR(500) COMMENT '封面图',
+  publish_time DATETIME NOT NULL COMMENT '发布时间',
+  status TINYINT NOT NULL DEFAULT 1 COMMENT '1有效 0下线',
+  create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_status_time (status, publish_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='资讯';
+
+CREATE TABLE IF NOT EXISTS banner (
+  id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',
+  title VARCHAR(128) NOT NULL COMMENT '标题',
+  subtitle VARCHAR(256) COMMENT '副标题',
+  cover VARCHAR(500) NOT NULL COMMENT '背景渐变或图片',
+  link VARCHAR(500) COMMENT '跳转链接',
+  sort INT NOT NULL DEFAULT 100 COMMENT '排序',
+  status TINYINT NOT NULL DEFAULT 1 COMMENT '1显示 0隐藏',
+  create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_status_sort (status, sort)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='首页轮播';
+
+CREATE TABLE IF NOT EXISTS `character` (
+  id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',
+  name VARCHAR(128) NOT NULL COMMENT '角色名',
+  title VARCHAR(128) COMMENT '称号/头衔',
+  faction VARCHAR(64) COMMENT '所属势力/国度',
+  role VARCHAR(32) COMMENT '定位: 法师/战士/辅助/坦克/射手',
+  difficulty VARCHAR(16) COMMENT '难度: 低/中/高',
+  description VARCHAR(500) COMMENT '角色描述',
+  cover VARCHAR(500) COMMENT '封面渐变',
+  sort INT NOT NULL DEFAULT 100 COMMENT '排序值',
+  status TINYINT NOT NULL DEFAULT 1 COMMENT '1上线 0下线',
+  create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_status_sort (status, sort)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='角色';
+
+CREATE TABLE IF NOT EXISTS sect (
+  id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',
+  name VARCHAR(128) NOT NULL COMMENT '国度名称',
+  subtitle VARCHAR(128) COMMENT '副标题',
+  philosophy VARCHAR(128) COMMENT '国度理念',
+  description VARCHAR(500) COMMENT '国度描述',
+  cover VARCHAR(500) COMMENT '封面渐变',
+  sort INT NOT NULL DEFAULT 100 COMMENT '排序值',
+  status TINYINT NOT NULL DEFAULT 1 COMMENT '1上线 0下线',
+  create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_status_sort (status, sort)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='云顶国度/势力';
+
+CREATE TABLE IF NOT EXISTS feature (
+  id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',
+  title VARCHAR(128) NOT NULL COMMENT '玩法标题',
+  summary VARCHAR(256) COMMENT '一句话概要',
+  description VARCHAR(500) COMMENT '玩法详细描述',
+  icon VARCHAR(16) COMMENT '图标符号',
+  sort INT NOT NULL DEFAULT 100 COMMENT '排序值',
+  status TINYINT NOT NULL DEFAULT 1 COMMENT '1上线 0下线',
+  create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_status_sort (status, sort)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='玩法特色';
+

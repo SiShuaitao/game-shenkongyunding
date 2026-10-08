@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>深空云顶 DEEP SKY : CLOUDPEAK</title>
+<link rel="stylesheet" href="./css/style.css" />
+<script type="importmap">
+{
+  "imports": {
+    "three": "./lib/three.module.js",
+    "three/addons/": "./lib/addons/"
+  }
+}
+</script>
+</head>
+<body>
+  <!-- 3D 渲染画布 -->
+  <canvas id="game-canvas"></canvas>
+
+  <!-- 世界坐标漂浮文字层（伤害数字等） -->
+  <div id="world-layer" aria-hidden="true"></div>
+
+  <!-- 屏幕特效层（受击红闪、暗角、扫描线） -->
+  <div id="screen-fx" aria-hidden="true">
+    <div class="vignette"></div>
+    <div class="hitflash"></div>
+    <div class="scanlines"></div>
+  </div>
+
+  <!-- ================= 标题 / 启航界面 ================= -->
+  <section id="boot-screen" class="screen active">
+    <div class="boot-inner">
+      <div class="boot-badge">DEEP SKY PROJECT · 07 · STAR CRUISE TRIAL</div>
+      <h1 class="game-logo">
+        <span class="logo-cn">深空云顶</span>
+        <span class="logo-en">CLOUDPEAK&nbsp;·&nbsp;深&nbsp;空&nbsp;之&nbsp;上&nbsp;的&nbsp;王&nbsp;庭</span>
+      </h1>
+      <p class="boot-tag">驾驶星舟穿越浮岛星域，在云顶王庭的废墟间，<br/>以极速连斩撕开虚空灾兽的潮汐。</p>
+      <button id="btn-launch" class="btn-primary">
+        <span class="btn-glitch"></span>
+        <span class="btn-label">启&nbsp;航</span>
+        <span class="btn-sub">ENGAGE DRIVE</span>
+      </button>
+      <div class="boot-controls">
+        <div class="bc-item"><kbd>W A S D</kbd><span>机动 / 移动</span></div>
+        <div class="bc-item"><kbd>鼠标</kbd><span>视角 · 点击锁定</span></div>
+        <div class="bc-item"><kbd>J / 左键</kbd><span>普攻连段</span></div>
+        <div class="bc-item"><kbd>Shift</kbd><span>极限闪避</span></div>
+        <div class="bc-item"><kbd>K</kbd><span>EX 战技</span></div>
+        <div class="bc-item"><kbd>Q</kbd><span>队友切换</span></div>
+        <div class="bc-item"><kbd>L</kbd><span>终焉奥义</span></div>
+        <div class="bc-item"><kbd>F</kbd><span>锁定目标</span></div>
+      </div>
+      <p class="boot-foot">建议佩戴耳机 · 键盘鼠标游玩 · 所有画面均为实时 3D 渲染</p>
+    </div>
+  </section>
+
+  <!-- ================= 宇宙星图 HUD ================= -->
+  <section id="map-hud" class="screen hud">
+    <header class="map-top">
+      <div class="brand-mini">
+        <span class="bm-mark">◆</span>
+        <span>深空云顶 · 星图导航</span>
+      </div>
+      <div class="map-sector">SECTOR Σ-07 / 云顶列岛</div>
+      <button id="btn-map-sound" class="icon-btn" title="声音开关">♪</button>
+    </header>
+
+    <div class="map-hint">拖拽旋转星图 · 滚轮缩放 · 点击发光浮岛选择作战区域</div>
+
+    <!-- 关卡简报面板 -->
+    <aside id="brief-panel" class="brief-panel hidden">
+      <div class="brief-corner tl"></div><div class="brief-corner tr"></div>
+      <div class="brief-corner bl"></div><div class="brief-corner br"></div>
+      <p class="brief-index" id="brief-index">MISSION 01</p>
+      <h2 class="brief-name" id="brief-name">云港前哨</h2>
+      <p class="brief-type" id="brief-type">普通作战 · 3 波敌人</p>
+      <p class="brief-desc" id="brief-desc"></p>
+      <div class="brief-enemies" id="brief-enemies"></div>
+      <div class="brief-rewards">
+        <span class="br-label">首次通关预期掉落</span>
+        <div class="br-items" id="brief-rewards"></div>
+      </div>
+      <button id="btn-deploy" class="btn-primary small">
+        <span class="btn-label">出&nbsp;击</span>
+        <span class="btn-sub">DEPLOY</span>
+      </button>
+      <button id="btn-brief-close" class="ghost-link">取消选择</button>
+    </aside>
+  </section>
+
+  <!-- ================= 战斗 HUD ================= -->
+  <section id="combat-hud" class="screen hud">
+    <!-- 顶部中央：波次 / Boss 血条 -->
+    <div class="combat-top">
+      <div id="wave-banner" class="wave-banner">
+        <span class="wb-tag">WAVE <i id="wave-cur">1</i> / <i id="wave-all">3</i></span>
+        <span class="wb-name" id="wave-name">敌群接近中</span>
+      </div>
+      <div id="boss-bar" class="boss-bar hidden">
+        <div class="boss-bar-head">
+          <span class="boss-name" id="boss-name">深空灾兽 · 虚渊</span>
+          <span class="boss-phase">PHASE <i id="boss-phase">1</i></span>
+        </div>
+        <div class="boss-hp-track"><div class="boss-hp-fill" id="boss-hp-fill"></div></div>
+      </div>
+    </div>
+
+    <!-- 左上：小队状态 -->
+    <div class="squad-panel">
+      <div class="squad-card" id="squad-0">
+        <div class="sc-portrait p0"><span class="sc-initial">岚</span></div>
+        <div class="sc-meta">
+          <p class="sc-name">云顶近卫 · 岚</p>
+          <div class="sc-hp-track"><div class="sc-hp-fill" id="hp-fill-0"></div></div>
+        </div>
+        <span class="sc-key">Q</span>
+      </div>
+      <div class="squad-card" id="squad-1">
+        <div class="sc-portrait p1"><span class="sc-initial">凛</span></div>
+        <div class="sc-meta">
+          <p class="sc-name">风行射手 · 凛</p>
+          <div class="sc-hp-track"><div class="sc-hp-fill" id="hp-fill-1"></div></div>
+        </div>
+        <span class="sc-key">Q</span>
+      </div>
+      <div class="energy-row">
+        <span class="er-label">EP</span>
+        <div class="er-track"><div class="er-fill" id="ep-fill"></div></div>
+      </div>
+      <div class="ult-row">
+        <span class="er-label ult">奥义</span>
+        <div class="er-track ult-track"><div class="er-fill ult-fill" id="ult-fill"></div>
+          <span class="ult-ready" id="ult-ready-text">奥义充能中</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右上：任务信息 + 暂停 -->
+    <div class="mission-panel">
+      <div class="mp-info">
+        <p class="mp-name" id="mp-mission-name">云港前哨</p>
+        <p class="mp-timer" id="mp-timer">00:00</p>
+      </div>
+      <button id="btn-pause" class="icon-btn" title="暂停 (P)">II</button>
+    </div>
+
+    <!-- 左下：连段评分 -->
+    <div class="style-panel" id="style-panel">
+      <div class="style-rank" id="style-rank">D</div>
+      <div class="style-info">
+        <div class="style-combo"><b id="combo-num">0</b><span>COMBO</span></div>
+        <div class="style-track"><div class="style-fill" id="style-fill"></div></div>
+      </div>
+    </div>
+
+    <!-- 右下：技能栏 -->
+    <div class="action-bar">
+      <div class="act-slot" id="act-attack">
+        <span class="act-key">J</span><span class="act-icon">⚔</span>
+        <span class="act-name">星辉连斩</span>
+      </div>
+      <div class="act-slot" id="act-dash">
+        <span class="act-key">SHIFT</span><span class="act-icon">»</span>
+        <span class="act-name">极限闪避</span>
+        <span class="act-charge" id="dash-charge"></span>
+      </div>
+      <div class="act-slot" id="act-ex">
+        <span class="act-key">K</span><span class="act-icon">✦</span>
+        <span class="act-name">星轨裂光</span>
+        <div class="act-cost" id="ex-cost"></div>
+      </div>
+      <div class="act-slot" id="act-swap">
+        <span class="act-key">Q</span><span class="act-icon">⇄</span>
+        <span class="act-name">协同切换</span>
+        <div class="act-cd-mask" id="swap-cd"></div>
+      </div>
+      <div class="act-slot ult" id="act-ult">
+        <span class="act-key">L</span><span class="act-icon">★</span>
+        <span class="act-name">终焉奥义</span>
+        <div class="act-cd-mask" id="ult-cd"></div>
+      </div>
+    </div>
+
+    <!-- 中央提示条（极限闪避 / 波次提示） -->
+    <div id="center-toast" class="center-toast"></div>
+
+    <!-- 点击锁定视角提示 -->
+    <div id="lock-hint" class="lock-hint hidden">点击画面接管视角 · ESC 释放鼠标</div>
+  </section>
+
+  <!-- ================= 暂停 ================= -->
+  <section id="pause-overlay" class="screen modal hidden">
+    <div class="modal-box">
+      <h2>作战暂停</h2>
+      <p>星舰引擎已怠速，深空中的时间为你停驻。</p>
+      <button id="btn-resume" class="btn-primary small"><span class="btn-label">继续作战</span></button>
+      <button id="btn-restart" class="btn-ghost">重新开始</button>
+      <button id="btn-quit-map" class="btn-ghost">撤离至星图</button>
+    </div>
+  </section>
+
+  <!-- ================= 结算 ================= -->
+  <section id="result-screen" class="screen modal hidden">
+    <div class="result-box">
+      <p class="result-kicker" id="result-kicker">MISSION CLEAR</p>
+      <h2 class="result-title" id="result-title">作战完成</h2>
+      <div class="result-rank" id="result-rank">S</div>
+      <p class="result-rank-label" id="result-rank-label">STYLISH RANK</p>
+      <div class="result-stats">
+        <div><span>作战用时</span><b id="rs-time">00:00</b></div>
+        <div><span>最高连段</span><b id="rs-combo">0</b></div>
+        <div><span>击破数</span><b id="rs-kills">0</b></div>
+        <div><span>极限闪避</span><b id="rs-dodge">0</b></div>
+        <div><span>承伤总量</span><b id="rs-damage">0</b></div>
+        <div><span>最高评分</span><b id="rs-style">D</b></div>
+      </div>
+      <div class="result-actions">
+        <button id="btn-result-retry" class="btn-primary small"><span class="btn-label">再次出击</span></button>
+        <button id="btn-result-map" class="btn-ghost">返回星图</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 转场遮罩 -->
+  <div id="transition" class="transition"></div>
+
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
