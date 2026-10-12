@@ -58,12 +58,12 @@ public class DataInitializer implements CommandLineRunner {
         }
         Game game = buildGame(
                 "shenkong", "深空云顶", "SKYLAND OF DEEP SPACE",
-                "童话魔幻", "空中飞船 · 城堡全景 · 马卡龙色调",
-                "欧式童话魔幻画风，蓝天白云、城堡全景动态，轻快治愈。",
-                "《深空云顶》构筑一座漂浮于云端的未来童话王国。空中飞船穿行于云海，悬浮岛屿上城堡全景动态铺展，柔和马卡龙色调晕染出蓝天白云。轻快治愈的魔幻旅程，邀你驾驭飞舟启航云端，书写属于自己的童话史诗。",
-                "http://shenkong.shixingxu.local",
-                "linear-gradient(170deg,#9ed8ff 0%,#c8b6ff 50%,#ffd6f0 100%), radial-gradient(circle at 30% 70%, rgba(255,255,255,0.45), transparent 45%)",
-                "fairytale",
+                "星际史诗", "深空星图 · 飞船舰岛 · 星际浪漫",
+                "未来科技风空中飞船与悬浮舰岛，宇宙星图 3D 动态铺展，深空暗调光影下宏大静谧的星际浪漫。",
+                "《深空云顶》是一座漂浮于深空星图之上的未来科技王国。空中飞船穿梭于悬浮舰岛之间，宇宙星图以 3D 动态铺展于穹顶，深空暗调光影勾勒出每一寸金属与星辉。这里没有喧嚣，只有宏大静谧的星际浪漫——引擎低鸣、星云流转，邀你驾驭飞舟驶入那片深蓝，书写属于自己的星际史诗。",
+                "http://localhost:5176",
+                "linear-gradient(170deg,#0A0F24 0%,#1A2450 50%,#0d1b3a 100%), radial-gradient(circle at 30% 70%, rgba(96,140,255,0.35), transparent 45%)",
+                "cosmos",
                 1, 10
         );
         gameMapper.insert(game);
@@ -78,21 +78,21 @@ public class DataInitializer implements CommandLineRunner {
         }
         List<Banner> banners = new ArrayList<>();
         banners.add(buildBanner(
-                "深空云顶 · 云端王国",
-                "空中飞船与岛屿，欧式童话魔幻",
-                "linear-gradient(170deg,#9ed8ff 0%,#c8b6ff 50%,#ffd6f0 100%), radial-gradient(circle at 30% 70%, rgba(255,255,255,0.45), transparent 45%)",
+                "深空云顶 · 星际史诗",
+                "宇宙星图 3D 动态铺展，深空暗调光影",
+                "linear-gradient(170deg,#0A0F24 0%,#1A2450 50%,#0d1b3a 100%), radial-gradient(circle at 30% 70%, rgba(96,140,255,0.35), transparent 45%)",
                 "#features", 10
         ));
         banners.add(buildBanner(
-                "星岚公主 · 云顶加冕",
-                "艾莉娅归来，星岚觉醒",
-                "linear-gradient(135deg,#c8b6ff 0%,#9ed8ff 100%), radial-gradient(circle at 70% 30%, rgba(255,255,255,0.5), transparent 50%)",
+                "星岚公主 · 星岚觉醒",
+                "艾莉娅归来，星岚共鸣深空",
+                "linear-gradient(135deg,#1A2450 0%,#0A0F24 100%), radial-gradient(circle at 70% 30%, rgba(180,108,255,0.4), transparent 50%)",
                 "#characters", 20
         ));
         banners.add(buildBanner(
-                "风行号 · 启航云海",
-                "跟随风行商会，畅游云端",
-                "linear-gradient(135deg,#9ed8ff 0%,#ffd6f0 100%), radial-gradient(circle at 30% 30%, rgba(255,255,255,0.5), transparent 50%)",
+                "风行号 · 启航深空",
+                "跟随风行商会，穿越星图航线",
+                "linear-gradient(135deg,#0A0F24 0%,#1A2450 100%), radial-gradient(circle at 30% 30%, rgba(96,140,255,0.4), transparent 50%)",
                 "#features", 30
         ));
         banners.forEach(bannerMapper::insert);
@@ -194,9 +194,9 @@ public class DataInitializer implements CommandLineRunner {
                 "✦", 30
         ));
         features.add(buildFeature(
-                "马卡龙色调治愈美术", "柔和色调与音乐共鸣",
-                "柔和马卡龙色调晕染蓝天白云，配合轻快治愈的旋律，构筑出童话般的云端世界。视觉与听觉共鸣，让每一次航行都成为一场放松心灵的治愈之旅，抚平旅途的疲惫。",
-                "❀", 40
+                "深空暗调光影美术", "深空暗调光影与星图共鸣",
+                "深空暗调光影勾勒每一寸金属与星辉，宇宙星图以 3D 动态铺展于穹顶。视觉与音效共鸣，构筑出宏大静谧的星际浪漫氛围，让每一次航行都成为一场沉浸式的深空之旅，在引擎低鸣与星云流转中感受宇宙的辽阔。",
+                "✦", 40
         ));
         features.add(buildFeature(
                 "飞船建造与改装", "UGC 飞船建造系统",

@@ -9,7 +9,8 @@ spring:
   sql:
     init:
       mode: always
-      continue-on-error: true
+      continue-on-error: false
+      encoding: UTF-8
       schema-locations: classpath:schema.sql
       data-locations: classpath:data.sql
 

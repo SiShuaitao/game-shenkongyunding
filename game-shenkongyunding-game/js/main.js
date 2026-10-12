@@ -15,11 +15,15 @@ const $ = id => document.getElementById(id);
 const canvas = $('game-canvas');
 const worldLayer = $('world-layer');
 
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance', preserveDrawingBuffer: true });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+// 性能要点：后期管线（EffectComposer）下 MSAA 不生效，antialias 关闭省一档开销；
+// preserveDrawingBuffer 会强制每帧 GPU→CPU 回拷，是掉帧大坑，必须去掉。
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
+const BASE_PR = Math.min(devicePixelRatio, 1.5);
+let quality = 1; // 自适应分辨率系数（1 / .85 / .7 / .55）
+renderer.setPixelRatio(BASE_PR);
 renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = THREE.PCFShadowMap; // PCFSoft 视差极小但更贵
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.08;
 
@@ -51,7 +55,7 @@ function makeComposer(bloom) {
   const cam = screen === 'map' ? map.cam : combat.cam;
   const c = new EffectComposer(renderer);
   c.addPass(new RenderPass(scene, cam));
-  const b = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), bloom.str, bloom.r, bloom.t);
+  const b = new UnrealBloomPass(new THREE.Vector2(innerWidth / 2, innerHeight / 2), bloom.str, bloom.r, bloom.t);
   c.addPass(b); c.addPass(new OutputPass());
   c.setSize(innerWidth, innerHeight);
   return c;
@@ -203,6 +207,22 @@ addEventListener('resize', () => {
   if (combat) combat.resize();
 });
 
+// ---------------- 自适应分辨率 ----------------
+let fpsAcc = 0, fpsN = 0;
+function applyQuality() {
+  renderer.setPixelRatio(BASE_PR * quality);
+  if (map) { map.resize(); map.composer && map.composer.setSize(innerWidth, innerHeight); }
+  if (combat) { combat.resize(); }
+}
+function tuneQuality(rdt) {
+  fpsAcc += rdt; fpsN++;
+  if (fpsAcc < 1.5) return;
+  const fps = fpsN / fpsAcc;
+  fpsAcc = 0; fpsN = 0;
+  if (fps < 45 && quality > .55) { quality = Math.max(.55, quality - .15); applyQuality(); }
+  else if (fps > 57 && quality < 1) { quality = Math.min(1, quality + .15); applyQuality(); }
+}
+
 // ---------------- 主循环 ----------------
 let last = performance.now();
 function frame(now) {
@@ -210,6 +230,7 @@ function frame(now) {
   last = now;
   try {
     updateTweens(rdt);
+    tuneQuality(rdt);
 
     if (screen === 'map' && map) {
       if (input.mouse.pressed[0]) map.click(input);
